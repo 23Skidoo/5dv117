@@ -1,0 +1,124 @@
+\documentclass[10pt, oneside]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{titling}
+\usepackage[nottoc, notlof]{tocbibind}
+\usepackage[pdftex]{graphicx}
+\usepackage[kerning,spacing]{microtype}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\usepackage[bookmarksnumbered, unicode, pdftex]{hyperref}
+
+\author{Mikhail Glushenkov, \texttt{<c05mgv@cs.umu.se>}}
+
+\title{Complementary Task -- Algorithms for Context-Free Grammars}
+
+\newcommand{\unit}[1]{\ensuremath{\, \mathrm{#1}}}
+
+\begin{document}
+\pagestyle{plain}
+\pdfbookmark[1]{Front page}{beg}
+
+\begin{titlingpage}
+  \begin{minipage}[t]{0.4\textwidth}
+  \begin{flushleft}
+  \texttt{5DV117 - Efficient Algorithms and Problem Complexity, Autumn 12}
+  \end{flushleft}
+  \end{minipage}
+  \begin{minipage}[t]{0.4\textwidth}
+  \begin{flushright}
+  \texttt{Umeå Universitet}
+  \end{flushright}
+  \end{minipage}
+  \vskip 60pt
+  \begin{center}
+  \LARGE\thetitle
+  \par\end{center}\vskip 0.5em
+  \begin{center}
+  \large\theauthor
+  \par\end{center}
+  \begin{center}
+  Date: \today
+  \par\end{center}
+  \vfill
+  \begin{center}
+    \textbf{Instructor} \linebreak \linebreak
+    Frank Drewes
+  \end{center}
+\end{titlingpage}
+
+% TOC
+%\thispagestyle{empty}
+%\pagebreak
+%\setcounter{page}{0}
+%\pdfbookmark[1]{Table of contents}{tab}
+%\tableofcontents
+\pagebreak
+
+% % i Sverige har vi normalt inget indrag vid nytt stycke
+\setlength{\parindent}{0pt}
+% men däremot lite mellanrum
+\setlength{\parskip}{10pt}
+
+\setcounter{section}{-1}
+
+\section{Introduction}
+
+The purpos of this assignment was to~\ldots The rest of the report is organised
+as follows~\ldots
+
+\section {Preliminaries}
+
+Moreover, extend your report by an introduction that explains what the document
+is about and provides a short general introduction to CFGs and the notation and
+terminology used. In addition to this, the introduction should summarize the
+structure and contents of the remainder of your report.
+
+
+\section {Step 1: The Chomsky Normal Form and the CYK
+algorithm}
+
+present
+eff
+
+\section {Step 2: Turning a CFG into Chomsky Normal
+Form}
+
+present
+eff
+
+\section {Step 3: Deciding Emptiness and Finiteness}
+
+present
+eff
+
+\section {Conclusions}
+
+Finally, write a concluding section that summarizes your work in a few sentences
+and mentions algorithms for CFGs that have not been implemented. (You should
+easily be able to find a few in the literature.) Moreover, write one or two
+paragraphs about undecidable problems for CFGs.
+
+\appendix
+
+\section {User's guide}
+
+Add a short appendix to your report, which contains instructions about how to
+install and use your implementation of the algorithms.
+
+
+\begin{thebibliography}{9}
+
+\bibitem{Textbook} \emph{Distributed Systems}\\
+\newblock George Coulouris, Jean Dollimore, Tim Kindberg and Gordon Blair\\
+\newblock Addison-Wesley, 2011\\
+
+several refs
+
+\end{thebibliography}
+
+\end{document}
