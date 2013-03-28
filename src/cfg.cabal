@@ -25,7 +25,8 @@ library
   build-depends:       base < 5,
                        array < 0.5,
                        containers < 0.6,
-                       parsec >= 3 && < 3.2
+                       parsec >= 3 && < 3.2,
+                       bifunctors
   ghc-options:        -Wall
 
 executable cykAlgorithm

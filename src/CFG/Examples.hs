@@ -1,4 +1,4 @@
-module CFG.Examples (balancedParentheses, sillyGrammar)
+module CFG.Examples (balancedParentheses, sillyGrammar, sillyGrammar2)
        where
 
 import CFG.Types
@@ -21,5 +21,12 @@ sillyGrammar :: CNFGrammar
 sillyGrammar =
   compileGrammar
   [ ruleStart "S" [("S1", "S2")]
-  , ruleTerminal "S1" 'O'
-  , ruleTerminal "S2" 'O' ]
+  , ruleTerminal "S1" 'o'
+  , ruleTerminal "S2" 'o' ]
+
+sillyGrammar2 :: CNFGrammar
+sillyGrammar2 =
+  compileGrammar
+  [ ruleStart "S" [("S", "S"), ("S1", "S1")]
+  , ruleTerminal "S1" '1'
+  , ruleTerminal "S1" '0' ]

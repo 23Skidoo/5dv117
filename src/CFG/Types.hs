@@ -16,12 +16,12 @@ module CFG.Types (
   ,ruleName, ruleNumber
   ,isTerminalRule, isNonTerminalRule, isStartRule
   ,terminalRuleProduces, nonTerminalRuleProductions
-  ,stringToSymbols, symbolsToString
+  ,charToSymbol, stringToSymbols, symbolsToString
   )
        where
 
-import Data.Maybe (fromJust)
-import qualified Data.Map as M
+import qualified Data.Map   as M
+import           Data.Maybe (fromJust)
 
 
 -- Grammar ADT definition.
@@ -98,9 +98,12 @@ terminalRuleProduces :: CNFRule a -> Symbol -> Bool
 terminalRuleProduces (TerminalRule _ s) s' = (s == s')
 terminalRuleProduces _                  _  = error "Terminal rule expected!"
 
-nonTerminalRuleProductions :: NumberedCNFRule -> [(Int, Int)]
+nonTerminalRuleProductions :: CNFRule a -> [(a, a)]
 nonTerminalRuleProductions (NonTerminalRule _ prods _) = prods
 nonTerminalRuleProductions  _ = error "Non-terminal rule expected!"
+
+charToSymbol :: Char -> Symbol
+charToSymbol = SymChar
 
 stringToSymbols :: String -> Symbols
 stringToSymbols s = map SymChar s
