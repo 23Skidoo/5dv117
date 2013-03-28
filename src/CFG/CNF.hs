@@ -1,2 +1,2 @@
-module CFG.CNF
+module CFG.CNF ()
        where

@@ -3,12 +3,11 @@ module Main
 
 import CFG.Examples
 import CFG.Parse
-import CFG.Types
 
-exampleValidInput :: [Symbol]
+exampleValidInput :: String
 exampleValidInput = "((((()))))"
 
-exampleInvalidInput :: [Symbol]
+exampleInvalidInput :: String
 exampleInvalidInput = "(()"
 
 main :: IO ()

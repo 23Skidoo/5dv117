@@ -10,12 +10,16 @@ import Data.Array.ST
 import CFG.Types
 
 -- The CYK algorithm.
-cykAlgorithm :: CNFGrammar -> [Symbol] -> Bool
-cykAlgorithm grammar input = or [arr ! (1,n,x) | x <- startIndices]
+cykAlgorithm :: CNFGrammar -> String -> Bool
+cykAlgorithm grammar input' = if n == 0
+                              -- TODO: Decide emptiness.
+                              then error "empty string"
+                              else or [arr ! (1,n,x) | x <- startIndices]
   where
     n = length input
     r = length grammar
     startIndices = map ruleNumber . filter isStartRule $ grammar
+    input        = stringToSymbols input'
 
     arr = runSTUArray $ do
       marr <- newArray ((1,1,1),(n,n,r)) False

@@ -16,6 +16,7 @@ module CFG.Types (
   ,ruleName, ruleNumber
   ,isTerminalRule, isNonTerminalRule, isStartRule
   ,terminalRuleProduces, nonTerminalRuleProductions
+  ,stringToSymbols, symbolsToString
   )
        where
 
@@ -25,7 +26,9 @@ import qualified Data.Map as M
 
 -- Grammar ADT definition.
 
-type Symbol     = Char
+newtype Symbol  = SymChar Char
+                  deriving (Show, Eq)
+type Symbols    = [Symbol]
 type RuleName   = String
 type RuleNumber = Int
 
@@ -44,8 +47,8 @@ type CNFGrammar = [NumberedCNFRule]
 
 -- Helpers for constructing the grammar.
 
-ruleTerminal :: RuleName -> Symbol -> NamedCNFRule
-ruleTerminal name prod = TerminalRule name prod
+ruleTerminal :: RuleName -> Char -> NamedCNFRule
+ruleTerminal name prod = TerminalRule name (SymChar prod)
 
 ruleNonTerminal :: RuleName -> [(RuleName, RuleName)] -> NamedCNFRule
 ruleNonTerminal name prods = NonTerminalRule name prods NormalRule
@@ -98,3 +101,9 @@ terminalRuleProduces _                  _  = error "Terminal rule expected!"
 nonTerminalRuleProductions :: NumberedCNFRule -> [(Int, Int)]
 nonTerminalRuleProductions (NonTerminalRule _ prods _) = prods
 nonTerminalRuleProductions  _ = error "Non-terminal rule expected!"
+
+stringToSymbols :: String -> Symbols
+stringToSymbols s = map SymChar s
+
+symbolsToString :: Symbols -> String
+symbolsToString syms = map (\(SymChar c) -> c) syms

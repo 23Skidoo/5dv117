@@ -1,2 +1,2 @@
-module CFG.Decide
+module CFG.Decide ()
        where
