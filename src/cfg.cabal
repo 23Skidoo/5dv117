@@ -1,0 +1,55 @@
+name:                cfg
+version:             0.1.0.0
+synopsis:            Algorithms for Context-Free Grammars.
+description:
+  My solution for the complementary task of the "Efficient Algorithms and
+  Problem Complexity" course.
+homepage:            http://www8.cs.umu.se/kurser/5DV117/HT12/
+license:             GPL-3
+license-file:        LICENSE
+author:              Mikhail Glushenkov
+maintainer:          c05mgv@cs.umu.se
+copyright:           (c) 2013 Mikhail Glushenkov
+category:            Text
+build-type:          Simple
+cabal-version:       >=1.8
+
+library
+  exposed-modules:     CFG.Types,
+                       CFG.Read,
+                       CFG.Parse,
+                       CFG.Decide
+                       CFG.CNF,
+                       CFG.Examples
+  -- other-modules:
+  build-depends:       base < 5,
+                       array < 0.5,
+                       containers < 0.6
+  ghc-options:        -Wall
+
+executable cykAlgorithm
+  hs-source-dirs:     exe/cykAlgorithm
+  main-is:            Main.hs
+  build-depends:      cfg ==0.1.*, base < 5
+  ghc-options:        -Wall
+
+executable cnfAlgorithm
+  hs-source-dirs:     exe/cnfAlgorithm
+  main-is:            Main.hs
+  build-depends:      cfg == 0.1.*, base < 5
+  ghc-options:        -Wall
+
+executable decisionAlgorithm
+  hs-source-dirs:     exe/decisionAlgorithm
+  main-is:            Main.hs
+  build-depends:      cfg ==0.1.*, base < 5
+  ghc-options:        -Wall
+
+test-suite tests
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     tests
+  main-is:            Tests.hs
+  build-depends:      cfg == 0.1.*, base < 5,
+                      test-framework, test-framework-quickcheck2,
+                      QuickCheck >= 2.0
+  ghc-options:        -Wall
