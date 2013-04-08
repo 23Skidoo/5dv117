@@ -20,6 +20,7 @@ library
                        CFG.Parse,
                        CFG.Decide
                        CFG.CNF,
+                       CFG.CNFHelpers,
                        CFG.Examples
   -- other-modules:
   build-depends:       base < 5,

@@ -3,10 +3,10 @@ module Main
 
 import System.Environment (getArgs)
 
+import CFG.CNFHelpers (compileGrammar)
 import CFG.Examples
 import CFG.Parse
 import CFG.Read
-import CFG.Types
 
 exampleValidInput :: String
 exampleValidInput = "((((()))))"

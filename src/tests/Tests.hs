@@ -8,10 +8,10 @@ import Test.Framework.Providers.QuickCheck2 as TF
 import Test.HUnit
 import Test.QuickCheck
 
+import CFG.CNFHelpers (compileGrammar)
 import CFG.Examples
 import CFG.Parse
 import CFG.Read
-import CFG.Types
 
 -- QuickCheck tests.
 prop_parentheses_gen :: Bool -> Gen Bool
