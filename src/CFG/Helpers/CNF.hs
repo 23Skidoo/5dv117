@@ -1,4 +1,5 @@
-module CFG.CNFHelpers (
+-- | Helpers for working with context-free grammars in Chomsky normal form.
+module CFG.Helpers.CNF (
   --  * Helpers for constructing the grammar.
    ruleTerminal, ruleNonTerminal
   ,compileGrammar, listToGrammar
@@ -10,12 +11,11 @@ module CFG.CNFHelpers (
   )
   where
 
-import CFG.Types
+import           CFG.Types
 
 import qualified Data.Map   as M
 import           Data.Maybe (fromJust)
 
--- Helpers for constructing the grammar.
 
 ruleTerminal :: RuleName -> Char -> NamedCNFRule
 ruleTerminal name prod = CNFTerminalRule name (charToSymbol prod)

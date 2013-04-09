@@ -7,8 +7,8 @@ import Data.Array.IArray
 import Data.Array.MArray
 import Data.Array.ST
 
+import CFG.Helpers.CNF
 import CFG.Types
-import CFG.CNFHelpers
 
 -- The CYK algorithm.
 cykAlgorithm :: CompiledCNFGrammar -> String -> Bool

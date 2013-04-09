@@ -1,8 +1,8 @@
 module CFG.Read (readCFGrammar, readCNFGrammar)
        where
 
+import CFG.Helpers.CNF
 import CFG.Types
-import CFG.CNFHelpers
 
 import Control.Applicative hiding (many, (<|>))
 import Control.Monad       (unless)

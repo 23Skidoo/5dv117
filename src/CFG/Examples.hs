@@ -1,8 +1,8 @@
 module CFG.Examples (balancedParentheses, sillyGrammar, sillyGrammar2)
        where
 
+import CFG.Helpers.CNF
 import CFG.Types
-import CFG.CNFHelpers
 
 -- | Example grammar: balanced parenthese.
 balancedParentheses :: CompiledCNFGrammar

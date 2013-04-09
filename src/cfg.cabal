@@ -16,11 +16,12 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     CFG.Types,
+                       CFG.Helpers.CNF,
+                       CFG.Helpers.CFG,
                        CFG.Read,
                        CFG.Parse,
                        CFG.Decide
                        CFG.CNF,
-                       CFG.CNFHelpers,
                        CFG.Examples
   -- other-modules:
   build-depends:       base < 5,

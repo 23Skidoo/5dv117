@@ -8,8 +8,8 @@ import Test.Framework.Providers.QuickCheck2 as TF
 import Test.HUnit
 import Test.QuickCheck
 
-import CFG.CNFHelpers (compileGrammar)
 import CFG.Examples
+import CFG.Helpers.CNF                      (compileGrammar)
 import CFG.Parse
 import CFG.Read
 

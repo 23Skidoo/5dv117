@@ -3,8 +3,8 @@ module Main
 
 import System.Environment (getArgs)
 
-import CFG.CNFHelpers (compileGrammar)
 import CFG.Examples
+import CFG.Helpers.CNF    (compileGrammar)
 import CFG.Parse
 import CFG.Read
 
