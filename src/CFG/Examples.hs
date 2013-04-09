@@ -1,33 +1,23 @@
 module CFG.Examples (balancedParentheses, sillyGrammar, sillyGrammar2)
        where
 
-import CFG.Helpers.CNF
-import CFG.Types
+import           CFG.Types
 
--- | Example grammar: balanced parenthese.
+import qualified CFG.Helpers.CNF as CNF
+import           CFG.Read
+
+fromRight :: Either String a -> a
+fromRight = either error id
+
+-- | Example grammar: balanced parentheses.
 balancedParentheses :: CompiledCNFGrammar
-balancedParentheses =
-  -- S -> SS | LH | LR
-  -- H -> SR
-  -- L -> '('
-  -- R -> ')'
-  listToGrammar
-  [ ruleNonTerminal "S" [ ("S","S"), ("L","H"), ("L","R")]
-  , ruleNonTerminal "H" [("S","R")]
-  , ruleTerminal "L" '('
-  , ruleTerminal "R" ')'
-  ]
+balancedParentheses = CNF.compileGrammar . fromRight . readCNFGrammar $
+                      "S -> SS, S -> LH, S -> LR, H -> SR, L -> (, R -> )"
 
 sillyGrammar :: CompiledCNFGrammar
-sillyGrammar =
-  listToGrammar
-  [ ruleNonTerminal "S" [("S1", "S2")]
-  , ruleTerminal "S1" 'o'
-  , ruleTerminal "S2" 'o' ]
+sillyGrammar = CNF.compileGrammar . fromRight . readCNFGrammar $
+               "S -> S1S2, S1 -> o, S2 -> o"
 
 sillyGrammar2 :: CompiledCNFGrammar
-sillyGrammar2 =
-  listToGrammar
-  [ ruleNonTerminal "S" [("S", "S"), ("S1", "S1")]
-  , ruleTerminal "S1" '1'
-  , ruleTerminal "S1" '0' ]
+sillyGrammar2 = CNF.compileGrammar . fromRight . readCNFGrammar $
+                "S -> SS, S -> S1S1, S1 -> 1, S1 -> 0"

@@ -1,8 +1,7 @@
 -- | Helpers for working with context-free grammars in Chomsky normal form.
 module CFG.Helpers.CNF (
   --  * Helpers for constructing the grammar.
-   ruleTerminal, ruleNonTerminal
-  ,compileGrammar, listToGrammar
+  compileGrammar
 
   -- * Misc. helper functions.
   ,ruleName, ruleNumber
@@ -15,13 +14,6 @@ import           CFG.Types
 
 import qualified Data.Map   as M
 import           Data.Maybe (fromJust)
-
-
-ruleTerminal :: RuleName -> Char -> NamedCNFRule
-ruleTerminal name prod = CNFTerminalRule name (charToSymbol prod)
-
-ruleNonTerminal :: RuleName -> [(RuleName, RuleName)] -> NamedCNFRule
-ruleNonTerminal name prods = CNFNonTerminalRule name prods
 
 compileGrammar :: NamedCNFGrammar -> CompiledCNFGrammar
 compileGrammar (CNFGrammar rules start e) =
@@ -39,10 +31,6 @@ compileGrammar (CNFGrammar rules start e) =
     compileRule (CNFNonTerminalRule name prods) =
       CNFNonTerminalRule (lookupName name)
       [(lookupName a, lookupName b) | (a,b) <- prods]
-
--- NB: this assumes that the grammar doesn't generate the empty string.
-listToGrammar :: [NamedCNFRule] -> CompiledCNFGrammar
-listToGrammar rules = compileGrammar $ CNFGrammar rules "S" False
 
 -- Misc. helper functions.
 

@@ -25,6 +25,7 @@ library
                        CFG.Examples
   -- other-modules:
   build-depends:       base < 5,
+                       mtl >= 2 && < 3,
                        array < 0.5,
                        containers < 0.6,
                        parsec >= 3 && < 3.2,

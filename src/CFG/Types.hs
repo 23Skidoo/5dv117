@@ -20,7 +20,7 @@ module CFG.Types (
 -- Basic types.
 
 newtype Symbol  = SymChar Char
-                  deriving (Show, Eq)
+                  deriving (Show, Eq, Ord)
 type Symbols    = [Symbol]
 type RuleName   = String
 type RuleNumber = Int
