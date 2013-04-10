@@ -34,7 +34,7 @@ cfgRulesP :: Parsec String () [(RuleName, [SymOrName])]
 cfgRulesP = sepBy cfgRuleP (char ',' >> spaces)
 
 -- | A single CFG rule. Sum type representation makes it easier to extract
--- non-terminals (see 'processRules').
+-- nonterminals (see 'processRules').
 cfgRuleP :: Parsec String () (RuleName, [SymOrName])
 cfgRuleP = do
   name <- ruleNameP
@@ -49,8 +49,8 @@ cfgRuleP = do
 validateCFGrammar :: [(RuleName, [SymOrName])] ->
                      Either String NamedCFGrammar
 validateCFGrammar g = do
-  -- Replace all Lefts with Rights in non-terminal productions. We don't want to
-  -- mix symbols and rule names in non-terminal rules.
+  -- Replace all Lefts with Rights in nonterminal productions. We don't want to
+  -- mix symbols and rule names in nonterminal rules.
   let (terms, nonterms) = partition isTerm g
       allNames          = S.fromList . map fst $ g
       allSyms           = map snd namedSyms ++ concatMap extractSyms nonterms
@@ -107,7 +107,7 @@ cnfRulesP :: Parsec String () [NamedCNFRule]
 cnfRulesP = sepBy cnfRuleP (char ',' >> spaces)
 
 -- | A rule name, followed by '<-', followed either by a terminal (lowercase
--- letter, digit or a punctuation symbol) or by two names of non-terminals.
+-- letter, digit or a punctuation symbol) or by two names of nonterminals.
 cnfRuleP :: Parsec String () NamedCNFRule
 cnfRuleP = do
   name  <- ruleNameP
@@ -180,5 +180,5 @@ validateCommon rules = do
                      nontermNamesSet `S.intersection` termNamesSet
 
   unless (null intersection) $
-    (Left $ "Some non-terminal rule names clash with non-terminals: "
+    (Left $ "Some nonterminal rule names clash with terminals: "
      ++ intersection)
