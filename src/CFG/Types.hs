@@ -13,6 +13,7 @@ module CFG.Types (
   ,NamedCNFGrammar, CompiledCNFGrammar
 
   -- * Misc. helper functions.
+  ,Rule(..)
   ,charToSymbol, stringToSymbols, symbolsToString
   )
   where
@@ -56,6 +57,59 @@ data CNFGrammar a = CNFGrammar { cnfRules         :: [CNFRule a]
 
 type NamedCNFGrammar    = CNFGrammar RuleName
 type CompiledCNFGrammar = CNFGrammar RuleNumber
+
+-- Basic helpers.
+
+class Rule r where
+
+  ruleName :: r a -> a
+  ruleName = ruleNumber
+
+  ruleNumber :: r a -> a
+  ruleNumber = ruleName
+
+  isTerminalRule :: r a -> Bool
+  isNonTerminalRule :: r a -> Bool
+
+  terminalRuleProduces :: r a -> Symbol -> Bool
+
+
+instance Rule CFGRule where
+
+--  ruleName :: CFGRule a -> a
+  ruleName (CFGTerminalRule name _)    = name
+  ruleName (CFGNonTerminalRule name _) = name
+
+--  isTerminalRule :: CFGRule a -> Bool
+  isTerminalRule (CFGTerminalRule _ _) = True
+  isTerminalRule _                     = False
+
+--  isNonTerminalRule :: CFGRule a -> Bool
+  isNonTerminalRule (CFGNonTerminalRule _ _) = True
+  isNonTerminalRule _                        = False
+
+--  terminalRuleProduces :: CFGRule a -> Symbol -> Bool
+  terminalRuleProduces (CFGTerminalRule _ s) s' = (s == s')
+  terminalRuleProduces _ _ = error "Terminal rule expected!"
+
+
+instance Rule CNFRule where
+
+--  ruleName :: CNFRule a -> a
+  ruleName (CNFTerminalRule name _)    = name
+  ruleName (CNFNonTerminalRule name _) = name
+
+--  isTerminalRule :: CNFRule a -> Bool
+  isTerminalRule (CNFTerminalRule _ _) = True
+  isTerminalRule _                     = False
+
+--  isNonTerminalRule :: CFGRule a -> Bool
+  isNonTerminalRule (CNFNonTerminalRule _ _) = True
+  isNonTerminalRule _                        = False
+
+--  terminalRuleProduces :: CNFRule a -> Symbol -> Bool
+  terminalRuleProduces (CNFTerminalRule _ s) s' = (s == s')
+  terminalRuleProduces _ _ = error "Terminal rule expected!"
 
 -- Helpers for working with the 'Symbol' type.
 charToSymbol :: Char -> Symbol

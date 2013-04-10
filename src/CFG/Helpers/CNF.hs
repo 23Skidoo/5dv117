@@ -4,9 +4,7 @@ module CFG.Helpers.CNF (
   compileGrammar
 
   -- * Misc. helper functions.
-  ,ruleName, ruleNumber
-  ,isTerminalRule, isNonTerminalRule, isStartRule
-  ,terminalRuleProduces, nonTerminalRuleProductions
+  ,isStartRule, nonTerminalRuleProductions
   )
   where
 
@@ -32,32 +30,9 @@ compileGrammar (CNFGrammar rules start e) =
       CNFNonTerminalRule (lookupName name)
       [(lookupName a, lookupName b) | (a,b) <- prods]
 
--- Misc. helper functions.
-
-ruleName :: NamedCNFRule -> RuleName
-ruleName (CNFTerminalRule name _)    = name
-ruleName (CNFNonTerminalRule name _) = name
-
-ruleNumber :: NumberedCNFRule -> RuleNumber
-ruleNumber (CNFTerminalRule num _)    = num
-ruleNumber (CNFNonTerminalRule num _) = num
-
-isTerminalRule :: CNFRule a -> Bool
-isTerminalRule (CNFTerminalRule _ _) = True
-isTerminalRule _                     = False
-
-isNonTerminalRule :: CNFRule a -> Bool
-isNonTerminalRule (CNFNonTerminalRule _ _) = True
-isNonTerminalRule _                        = False
-
 isStartRule :: (Eq a) => CNFGrammar a -> CNFRule a -> Bool
-isStartRule g (CNFNonTerminalRule name _) | cnfStartRule g == name = True
-                                          | otherwise              = False
-isStartRule _ (CNFTerminalRule _ _)                                = False
-
-terminalRuleProduces :: CNFRule a -> Symbol -> Bool
-terminalRuleProduces (CNFTerminalRule _ s) s' = (s == s')
-terminalRuleProduces _                  _  = error "Terminal rule expected!"
+isStartRule g r | (cnfStartRule g == ruleName r) = True
+                | otherwise                      = False
 
 nonTerminalRuleProductions :: CNFRule a -> [(a, a)]
 nonTerminalRuleProductions (CNFNonTerminalRule _ prods) = prods

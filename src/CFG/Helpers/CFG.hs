@@ -1,7 +1,7 @@
 -- | Helpers for working with general context-free grammars.
 module CFG.Helpers.CFG (
     -- * Basic helpers.
-    ruleName, ruleNumber, isNonTerminalRule, nonTerminalRuleProductions
+    isStartRule, nonTerminalRuleProductions
     -- * Monad for fresh names.
    ,NameMonad, runNameMonad, freshName, rememberName
   )
@@ -13,17 +13,10 @@ import           Control.Monad.State
 import qualified Data.Set            as S
 
 -- Basic helpers
-ruleName :: NamedCFGRule -> RuleName
-ruleName (CFGTerminalRule name _)    = name
-ruleName (CFGNonTerminalRule name _) = name
 
-ruleNumber :: NumberedCFGRule -> RuleNumber
-ruleNumber (CFGTerminalRule num _)    = num
-ruleNumber (CFGNonTerminalRule num _) = num
-
-isNonTerminalRule :: CFGRule a -> Bool
-isNonTerminalRule (CFGNonTerminalRule _ _) = True
-isNonTerminalRule _                        = False
+isStartRule :: (Eq a) => CFGrammar a -> CFGRule a -> Bool
+isStartRule g r | (cfgStartRule g == ruleName r) = True
+                | otherwise                      = False
 
 nonTerminalRuleProductions :: CFGRule a -> [[a]]
 nonTerminalRuleProductions (CFGNonTerminalRule _ prods) = prods

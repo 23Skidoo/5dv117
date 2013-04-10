@@ -20,4 +20,4 @@ sillyGrammar = CNF.compileGrammar . fromRight . readCNFGrammar $
 
 sillyGrammar2 :: CompiledCNFGrammar
 sillyGrammar2 = CNF.compileGrammar . fromRight . readCNFGrammar $
-                "S -> SS, S -> S1S1, S1 -> 1, S1 -> 0"
+                "S -> SS, S -> S1S2, S -> S2S1, S1 -> 1, S2 -> 0"

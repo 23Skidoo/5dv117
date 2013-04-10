@@ -9,7 +9,8 @@ import           Control.Applicative hiding (many, (<|>))
 import           Control.Monad       (foldM, unless)
 import           Data.Bifunctor      (first)
 import           Data.Either         (partitionEithers)
-import           Data.List           (find, groupBy, partition, sortBy)
+import           Data.List           (find, groupBy, intercalate
+                                     ,partition, sortBy)
 import qualified Data.Map            as M
 import           Data.Maybe          (fromJust, isJust)
 import           Data.Ord            (comparing)
@@ -64,20 +65,13 @@ validateCFGrammar g = do
       nontermRules      = map (toNonTermRule allSymsMap) nonterms
       allRules          = termRules ++ nontermRules
 
-  -- Merge all non-terminal productions with the same name. TODO: remove
-  -- duplication.
-      sorted            = sortBy (comparing CFG.ruleName) allRules
-      grouped           = groupBy
-                          (\r0 r1 ->
-                            CFG.isNonTerminalRule r0
-                            && CFG.isNonTerminalRule r1
-                            && CFG.ruleName r0 == CFG.ruleName r1) sorted
+  -- Group productions of all nonterminals together.
+  let grouped           = groupRules allRules
       merged            = foldr mergeProductions [] grouped
 
-  -- Check that the grammar contains the start rule.
-  unless (S.member "S" allNames) $ (Left "No start rule found!")
-
+  validateCommon merged
   return (CFGrammar merged "S")
+
   where
     isTerm :: (RuleName, [SymOrName]) -> Bool
     isTerm (_,[Left _]) = True
@@ -87,8 +81,8 @@ validateCFGrammar g = do
     extractSyms (_, l) = fst . partitionEithers $ l
 
     bindSym :: SymbolMap -> Symbol -> CFG.NameMonad SymbolMap
-    bindSym m sym      = do n <- CFG.freshName
-                            return $ M.insert sym n m
+    bindSym m sym = do n <- CFG.freshName
+                       return $ M.insert sym n m
 
     toTermRule :: (RuleName, Symbol) -> NamedCFGRule
     toTermRule (nam, sym)             = CFGTerminalRule nam sym
@@ -101,11 +95,12 @@ validateCFGrammar g = do
         toName (Left sym) = fromJust . M.lookup sym $ symMap
         toName (Right n)  = n
 
+    -- TODO: it'd would be nice to remove duplication here.
     mergeProductions :: [NamedCFGRule] -> [NamedCFGRule] -> [NamedCFGRule]
     mergeProductions [] rest     = rest
     mergeProductions [rule] rest = rule:rest
     mergeProductions rules  rest =
-      let name  = CFG.ruleName . head $ rules
+      let name  = ruleName . head $ rules
           prods = concatMap CFG.nonTerminalRuleProductions rules
       in  (CFGNonTerminalRule name prods) : rest
 
@@ -147,27 +142,54 @@ terminalP = charToSymbol <$>
 -- | Given a bunch of CNF rules, perform various checks on them.
 validateCNFGrammar :: [NamedCNFRule] -> Either String NamedCNFGrammar
 validateCNFGrammar g = do
-  -- Group productions of non-terminals together (not actually necessary).
-  let sorted  = sortBy (comparing CNF.ruleName) g
-      grouped = groupBy (\r0 r1 -> CNF.isNonTerminalRule r0
-                                   && CNF.isNonTerminalRule r1
-                                   && CNF.ruleName r0 == CNF.ruleName r1) sorted
+  -- Group productions of non-terminals together.
+  let grouped = groupRules g
       merged  = foldr mergeProductions [] grouped
 
-  -- Check that the start rule exists.
-  unless (isJust $ find (\r -> CNF.ruleName r == "S") merged) $
-    (Left "No start rule found!")
+  -- A parsed grammar in CNF never produces an empty string, this can happen
+  -- only when converting a general CFG to CNF.
+  let producesEmpty = False
 
-  -- TODO: Add more validity checks. Check whether the grammar produces an empty
-  -- string.
-  -- Check that terminal rules are unique and don't intersect with nonterminals.
-  return (CNFGrammar merged "S" False)
+  validateCommon merged
+  return (CNFGrammar merged "S" producesEmpty)
 
   where
     mergeProductions :: [NamedCNFRule] -> [NamedCNFRule] -> [NamedCNFRule]
     mergeProductions [] rest     = rest
     mergeProductions [rule] rest = rule:rest
     mergeProductions rules  rest =
-      let name  = CNF.ruleName . head $ rules
+      let name  = ruleName . head $ rules
           prods = concatMap CNF.nonTerminalRuleProductions rules
       in  (CNFNonTerminalRule name prods) : rest
+
+-- | Group nonterminal rules by name (in preparation for merging).
+groupRules :: (Rule r) => [r RuleName] -> [[r RuleName]]
+groupRules rs = groupBy (\r0 r1 -> isNonTerminalRule r0 && isNonTerminalRule r1
+                                   && ruleName r0 == ruleName r1) sorted
+  where
+    sorted = sortBy (comparing ruleName) rs
+
+-- | Common checks.
+validateCommon :: Rule r => [r RuleName] -> Either String ()
+validateCommon rules = do
+    -- Check that the start rule exists.
+  unless (isJust $ find (\r -> ruleName r == "S") rules) $
+    (Left "No start rule found!")
+
+  -- Check that terminal rule names are unique.
+  let termNames    = map ruleName . filter isTerminalRule $ rules
+      termNamesSet = S.fromList termNames
+      nonUnique    = intercalate ", " . map head
+                     . filter ((>1) . length) . groupBy (==) $ termNames
+  unless (S.size termNamesSet == length termNames) $
+    (Left $ "Some terminal rule names are not unique: " ++ nonUnique)
+
+  -- Check that terminal rule names don't intersect with nonterminals.
+  let nontermNames = map ruleName . filter isNonTerminalRule $ rules
+      nontermNamesSet = S.fromList nontermNames
+      intersection = intercalate ", " . S.toList $
+                     nontermNamesSet `S.intersection` termNamesSet
+
+  unless (null intersection) $
+    (Left $ "Some non-terminal rule names clash with non-terminals: "
+     ++ intersection)
