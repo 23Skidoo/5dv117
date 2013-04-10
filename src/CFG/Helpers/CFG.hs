@@ -17,7 +17,7 @@ data NameState = NameState { nameStateCounter :: !Int
                  deriving Show
 type NameMonad = State NameState
 
--- | Initial state, for using in conjunction with 'runState'.
+-- | Given an intial state, run the name monad.
 runNameMonad :: S.Set RuleName -> NameMonad a -> a
 runNameMonad s act = fst $ runState act (NameState 0 s)
 
