@@ -25,4 +25,4 @@ compileGrammar (CNFGrammar rules start e) =
       CNFTerminalRule (lookupName name) symbol
     compileRule (CNFNonTerminalRule name prods) =
       CNFNonTerminalRule (lookupName name)
-      [Pair (lookupName a) (lookupName b) | Pair a b <- prods]
+      [((lookupName a), (lookupName b)) | (a, b) <- prods]

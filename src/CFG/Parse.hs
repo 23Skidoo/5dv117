@@ -35,7 +35,7 @@ cykAlgorithm grammar input' = if n == 0
           forM_ [1..(i-1)] $ \k ->
             forM_ (filter isNonTerminalRule rules) $ \rule -> do
               let a = ruleNumber rule
-              forM_ (nonTerminalRuleProductions rule) $ \(Pair b c) -> do
+              forM_ (nonTerminalRuleProductions rule) $ \(b, c) -> do
                 e0 <- readArray marr (j,k,b)
                 e1 <- readArray marr (j+k,i-k,c)
                 when (e0 && e1) $

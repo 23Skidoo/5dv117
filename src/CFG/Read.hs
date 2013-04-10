@@ -116,7 +116,7 @@ cnfRuleP = do
   case mTerm of
     Just t  -> return $ CNFTerminalRule name t
     Nothing -> do
-      rhs <- pure Pair <*> ruleNameP <*> ruleNameP
+      rhs <- pure (,) <*> ruleNameP <*> ruleNameP
       return $ CNFNonTerminalRule name [rhs]
 
 -- | A rule name: an upper-case letter followed by zero or more digits.

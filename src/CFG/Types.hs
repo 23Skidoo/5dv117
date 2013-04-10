@@ -9,7 +9,7 @@ module CFG.Types (
   ,NamedCFGRule, NumberedCFGRule
   ,NamedCFGrammar, CompiledCFGrammar
 
-  ,Pair(..), CNFRule(..), CNFGrammar(..)
+  ,CNFRule(..), CNFGrammar(..)
   ,NamedCNFRule, NumberedCNFRule
   ,NamedCNFGrammar, CompiledCNFGrammar
 
@@ -44,10 +44,8 @@ type NamedCFGrammar    = CFGrammar RuleName
 type CompiledCFGrammar = CFGrammar RuleNumber
 
 -- A context-free grammar in CNF form.
-data Pair a = Pair !a !a
-            deriving (Eq, Show)
 data CNFRule a = CNFTerminalRule !a !Symbol
-               | CNFNonTerminalRule !a ![Pair a]
+               | CNFNonTerminalRule !a ![(a,a)]
                deriving (Eq, Show)
 
 type NamedCNFRule    = CNFRule RuleName
@@ -64,8 +62,8 @@ type CompiledCNFGrammar = CNFGrammar RuleNumber
 -- Basic helpers.
 
 -- | Helpers for rules.
-class Rule r where
-  type NonTermProduction r :: * -> *
+class Rule (r :: * -> *) where
+  type NonTermProduction r a :: *
 
   ruleName   :: r a -> a
   ruleName   = ruleNumber
@@ -81,7 +79,7 @@ class Rule r where
   mkNonTerminal :: a -> [NonTermProduction r a] -> r a
 
 instance Rule CFGRule where
-  type NonTermProduction CFGRule = []
+  type NonTermProduction CFGRule a = [a]
 
   ruleName (CFGTerminalRule name _)    = name
   ruleName (CFGNonTerminalRule name _) = name
@@ -101,7 +99,7 @@ instance Rule CFGRule where
   mkNonTerminal name prods = CFGNonTerminalRule name prods
 
 instance Rule CNFRule where
-  type NonTermProduction CNFRule = Pair
+  type NonTermProduction CNFRule a = (a,a)
 
   ruleName (CNFTerminalRule name _)    = name
   ruleName (CNFNonTerminalRule name _) = name
