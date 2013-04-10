@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 -- | Basic types and helper functions for constructing a context-free grammar.
 module CFG.Types (
   -- * Types.
@@ -8,12 +9,12 @@ module CFG.Types (
   ,NamedCFGRule, NumberedCFGRule
   ,NamedCFGrammar, CompiledCFGrammar
 
-  ,CNFRule(..), CNFGrammar(..)
+  ,Pair(..), CNFRule(..), CNFGrammar(..)
   ,NamedCNFRule, NumberedCNFRule
   ,NamedCNFGrammar, CompiledCNFGrammar
 
   -- * Misc. helper functions.
-  ,Rule(..)
+  ,Rule(..), Grammar(..), isStartRule
   ,charToSymbol, stringToSymbols, symbolsToString
   )
   where
@@ -43,8 +44,10 @@ type NamedCFGrammar    = CFGrammar RuleName
 type CompiledCFGrammar = CFGrammar RuleNumber
 
 -- A context-free grammar in CNF form.
+data Pair a = Pair !a !a
+            deriving (Eq, Show)
 data CNFRule a = CNFTerminalRule !a !Symbol
-               | CNFNonTerminalRule !a ![(a, a)]
+               | CNFNonTerminalRule !a ![Pair a]
                deriving (Eq, Show)
 
 type NamedCNFRule    = CNFRule RuleName
@@ -60,56 +63,78 @@ type CompiledCNFGrammar = CNFGrammar RuleNumber
 
 -- Basic helpers.
 
+-- | Helpers for rules.
 class Rule r where
+  type NonTermProduction r :: * -> *
 
-  ruleName :: r a -> a
-  ruleName = ruleNumber
-
+  ruleName   :: r a -> a
+  ruleName   = ruleNumber
   ruleNumber :: r a -> a
   ruleNumber = ruleName
 
-  isTerminalRule :: r a -> Bool
+  isTerminalRule    :: r a -> Bool
   isNonTerminalRule :: r a -> Bool
 
-  terminalRuleProduces :: r a -> Symbol -> Bool
+  terminalRuleProduces       :: r a -> Symbol -> Bool
+  nonTerminalRuleProductions :: r a -> [NonTermProduction r a]
 
+  mkNonTerminal :: a -> [NonTermProduction r a] -> r a
 
 instance Rule CFGRule where
+  type NonTermProduction CFGRule = []
 
---  ruleName :: CFGRule a -> a
   ruleName (CFGTerminalRule name _)    = name
   ruleName (CFGNonTerminalRule name _) = name
 
---  isTerminalRule :: CFGRule a -> Bool
   isTerminalRule (CFGTerminalRule _ _) = True
   isTerminalRule _                     = False
 
---  isNonTerminalRule :: CFGRule a -> Bool
   isNonTerminalRule (CFGNonTerminalRule _ _) = True
   isNonTerminalRule _                        = False
 
---  terminalRuleProduces :: CFGRule a -> Symbol -> Bool
   terminalRuleProduces (CFGTerminalRule _ s) s' = (s == s')
   terminalRuleProduces _ _ = error "Terminal rule expected!"
 
+  nonTerminalRuleProductions (CFGNonTerminalRule _ prods) = prods
+  nonTerminalRuleProductions _ = error "Nonterminal rule expected!"
+
+  mkNonTerminal name prods = CFGNonTerminalRule name prods
 
 instance Rule CNFRule where
+  type NonTermProduction CNFRule = Pair
 
---  ruleName :: CNFRule a -> a
   ruleName (CNFTerminalRule name _)    = name
   ruleName (CNFNonTerminalRule name _) = name
 
---  isTerminalRule :: CNFRule a -> Bool
   isTerminalRule (CNFTerminalRule _ _) = True
   isTerminalRule _                     = False
 
---  isNonTerminalRule :: CFGRule a -> Bool
   isNonTerminalRule (CNFNonTerminalRule _ _) = True
   isNonTerminalRule _                        = False
 
---  terminalRuleProduces :: CNFRule a -> Symbol -> Bool
   terminalRuleProduces (CNFTerminalRule _ s) s' = (s == s')
   terminalRuleProduces _ _ = error "Terminal rule expected!"
+
+  nonTerminalRuleProductions (CNFNonTerminalRule _ prods) = prods
+  nonTerminalRuleProductions _ = error "Nonterminal rule expected!"
+
+  mkNonTerminal name prods = CNFNonTerminalRule name prods
+
+
+-- | Helpers for grammars.
+class Grammar g where
+  startRule :: g a -> a
+
+instance Grammar CNFGrammar where
+  startRule g = cnfStartRule g
+
+instance Grammar CFGrammar where
+  startRule g = cfgStartRule g
+
+isStartRule :: (Eq a, Grammar g, Rule r) => g a -> r a -> Bool
+isStartRule g r | (startRule g == ruleName r) = True
+                | otherwise                   = False
+
 
 -- Helpers for working with the 'Symbol' type.
 charToSymbol :: Char -> Symbol

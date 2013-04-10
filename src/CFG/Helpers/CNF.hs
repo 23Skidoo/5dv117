@@ -2,9 +2,6 @@
 module CFG.Helpers.CNF (
   --  * Helpers for constructing the grammar.
   compileGrammar
-
-  -- * Misc. helper functions.
-  ,isStartRule, nonTerminalRuleProductions
   )
   where
 
@@ -28,12 +25,4 @@ compileGrammar (CNFGrammar rules start e) =
       CNFTerminalRule (lookupName name) symbol
     compileRule (CNFNonTerminalRule name prods) =
       CNFNonTerminalRule (lookupName name)
-      [(lookupName a, lookupName b) | (a,b) <- prods]
-
-isStartRule :: (Eq a) => CNFGrammar a -> CNFRule a -> Bool
-isStartRule g r | (cnfStartRule g == ruleName r) = True
-                | otherwise                      = False
-
-nonTerminalRuleProductions :: CNFRule a -> [(a, a)]
-nonTerminalRuleProductions (CNFNonTerminalRule _ prods) = prods
-nonTerminalRuleProductions  _ = error "Non-terminal rule expected!"
+      [Pair (lookupName a) (lookupName b) | Pair a b <- prods]

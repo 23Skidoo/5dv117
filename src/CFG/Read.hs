@@ -2,7 +2,6 @@ module CFG.Read (readCFGrammar, readCNFGrammar)
        where
 
 import qualified CFG.Helpers.CFG     as CFG
-import qualified CFG.Helpers.CNF     as CNF
 import           CFG.Types
 
 import           Control.Applicative hiding (many, (<|>))
@@ -66,8 +65,7 @@ validateCFGrammar g = do
       allRules          = termRules ++ nontermRules
 
   -- Group productions of all nonterminals together.
-  let grouped           = groupRules allRules
-      merged            = foldr mergeProductions [] grouped
+  let merged            = mergeRules allRules
 
   validateCommon merged
   return (CFGrammar merged "S")
@@ -95,15 +93,6 @@ validateCFGrammar g = do
         toName (Left sym) = fromJust . M.lookup sym $ symMap
         toName (Right n)  = n
 
-    -- TODO: it'd would be nice to remove duplication here.
-    mergeProductions :: [NamedCFGRule] -> [NamedCFGRule] -> [NamedCFGRule]
-    mergeProductions [] rest     = rest
-    mergeProductions [rule] rest = rule:rest
-    mergeProductions rules  rest =
-      let name  = ruleName . head $ rules
-          prods = concatMap CFG.nonTerminalRuleProductions rules
-      in  (CFGNonTerminalRule name prods) : rest
-
 
 -- | Parse a comma-delimited string representing a context-free grammar in
 -- CNF. Uppercase letters followed by zero or more digits act as nonterminals
@@ -127,7 +116,7 @@ cnfRuleP = do
   case mTerm of
     Just t  -> return $ CNFTerminalRule name t
     Nothing -> do
-      rhs <- pure (,) <*> ruleNameP <*> ruleNameP
+      rhs <- pure Pair <*> ruleNameP <*> ruleNameP
       return $ CNFNonTerminalRule name [rhs]
 
 -- | A rule name: an upper-case letter followed by zero or more digits.
@@ -142,9 +131,8 @@ terminalP = charToSymbol <$>
 -- | Given a bunch of CNF rules, perform various checks on them.
 validateCNFGrammar :: [NamedCNFRule] -> Either String NamedCNFGrammar
 validateCNFGrammar g = do
-  -- Group productions of non-terminals together.
-  let grouped = groupRules g
-      merged  = foldr mergeProductions [] grouped
+  -- Group productions of nonterminals together.
+  let merged = mergeRules g
 
   -- A parsed grammar in CNF never produces an empty string, this can happen
   -- only when converting a general CFG to CNF.
@@ -153,21 +141,22 @@ validateCNFGrammar g = do
   validateCommon merged
   return (CNFGrammar merged "S" producesEmpty)
 
+-- | Group productions of nonterminals together by name.
+mergeRules :: (Rule r) => [r RuleName] -> [r RuleName]
+mergeRules rs = foldr mergeProductions [] grouped
   where
-    mergeProductions :: [NamedCNFRule] -> [NamedCNFRule] -> [NamedCNFRule]
+    sorted  = sortBy (comparing ruleName) rs
+    grouped = groupBy (\r0 r1 -> isNonTerminalRule r0
+                                 && isNonTerminalRule r1
+                                 && ruleName r0 == ruleName r1) sorted
+
+    mergeProductions :: Rule r => [r RuleName] -> [r RuleName] -> [r RuleName]
     mergeProductions [] rest     = rest
     mergeProductions [rule] rest = rule:rest
     mergeProductions rules  rest =
       let name  = ruleName . head $ rules
-          prods = concatMap CNF.nonTerminalRuleProductions rules
-      in  (CNFNonTerminalRule name prods) : rest
-
--- | Group nonterminal rules by name (in preparation for merging).
-groupRules :: (Rule r) => [r RuleName] -> [[r RuleName]]
-groupRules rs = groupBy (\r0 r1 -> isNonTerminalRule r0 && isNonTerminalRule r1
-                                   && ruleName r0 == ruleName r1) sorted
-  where
-    sorted = sortBy (comparing ruleName) rs
+          prods = concatMap nonTerminalRuleProductions rules
+      in  (mkNonTerminal name prods) : rest
 
 -- | Common checks.
 validateCommon :: Rule r => [r RuleName] -> Either String ()
