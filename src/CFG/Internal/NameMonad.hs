@@ -1,6 +1,5 @@
--- | Helpers for working with general context-free grammars.
-module CFG.Helpers.CFG (
-  -- * Monad for fresh names.
+-- | Helper monad for generating fresh names.
+module CFG.Internal.NameMonad (
   NameMonad, runNameMonad, freshName, rememberName
   )
   where

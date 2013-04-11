@@ -16,13 +16,12 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     CFG.Types,
-                       CFG.Helpers.CFG,
                        CFG.Read,
                        CFG.Parse,
                        CFG.Decide
                        CFG.CNF,
                        CFG.Examples
-  -- other-modules:
+  other-modules:       CFG.Internal.NameMonad
   build-depends:       base < 5,
                        mtl >= 2 && < 3,
                        array < 0.5,

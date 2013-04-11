@@ -1,20 +1,20 @@
 module CFG.Read (readCFGrammar, readCNFGrammar)
        where
 
-import qualified CFG.Helpers.CFG     as CFG
+import           CFG.Internal.NameMonad
 import           CFG.Types
 
-import           Control.Applicative hiding (many, (<|>))
-import           Control.Monad       (foldM, unless)
-import           Data.Bifunctor      (first)
-import           Data.Either         (partitionEithers)
-import           Data.List           (find, groupBy, intercalate
-                                     ,partition, sortBy)
-import qualified Data.Map            as M
-import           Data.Maybe          (fromJust, isJust)
-import           Data.Ord            (comparing)
-import qualified Data.Set            as S
-import           Data.Tuple          (swap)
+import           Control.Applicative    hiding (many, (<|>))
+import           Control.Monad          (foldM, unless)
+import           Data.Bifunctor         (first)
+import           Data.Either            (partitionEithers)
+import           Data.List              (find, groupBy, intercalate, partition,
+                                         sortBy)
+import qualified Data.Map               as M
+import           Data.Maybe             (fromJust, isJust)
+import           Data.Ord               (comparing)
+import qualified Data.Set               as S
+import           Data.Tuple             (swap)
 import           Text.Parsec
 
 type SymbolMap = M.Map Symbol RuleName
@@ -56,7 +56,7 @@ validateCFGrammar g = do
       allSyms           = map snd namedSyms ++ concatMap extractSyms nonterms
       namedSyms         = map (\(nam, [Left sym]) -> (nam, sym)) terms
 
-      allSymsMap        = CFG.runNameMonad allNames $
+      allSymsMap        = runNameMonad allNames $
                           foldM bindSym M.empty allSyms
 
       termRules         = map toTermRule namedSyms
@@ -78,8 +78,8 @@ validateCFGrammar g = do
     extractSyms :: (RuleName, [SymOrName]) -> [Symbol]
     extractSyms (_, l) = fst . partitionEithers $ l
 
-    bindSym :: SymbolMap -> Symbol -> CFG.NameMonad SymbolMap
-    bindSym m sym = do n <- CFG.freshName
+    bindSym :: SymbolMap -> Symbol -> NameMonad SymbolMap
+    bindSym m sym = do n <- freshName
                        return $ M.insert sym n m
 
     toTermRule :: (RuleName, Symbol) -> NamedCFGRule
