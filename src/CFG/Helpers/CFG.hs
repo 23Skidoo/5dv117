@@ -5,11 +5,10 @@ module CFG.Helpers.CFG (
   )
   where
 
-import CFG.Types
+import           CFG.Types
 
 import           Control.Monad.State
 import qualified Data.Set            as S
-
 
 -- Monad for generating fresh names.
 data NameState = NameState { nameStateCounter :: !Int

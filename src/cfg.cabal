@@ -16,7 +16,6 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     CFG.Types,
-                       CFG.Helpers.CNF,
                        CFG.Helpers.CFG,
                        CFG.Read,
                        CFG.Parse,

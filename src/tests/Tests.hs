@@ -9,9 +9,9 @@ import Test.HUnit
 import Test.QuickCheck
 
 import CFG.Examples
-import CFG.Helpers.CNF                      (compileGrammar)
 import CFG.Parse
 import CFG.Read
+import CFG.Types
 
 -- QuickCheck tests.
 prop_parentheses_gen :: Bool -> Gen Bool

@@ -4,9 +4,9 @@ module Main
 import System.Environment (getArgs)
 
 import CFG.Examples
-import CFG.Helpers.CNF    (compileGrammar)
 import CFG.Parse
 import CFG.Read
+import CFG.Types
 
 exampleValidInput :: String
 exampleValidInput = "((((()))))"

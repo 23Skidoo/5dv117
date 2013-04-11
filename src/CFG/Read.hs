@@ -62,10 +62,10 @@ validateCFGrammar g = do
       termRules         = map toTermRule namedSyms
                           ++ map (toTermRule . swap) (M.toList allSymsMap)
       nontermRules      = map (toNonTermRule allSymsMap) nonterms
-      allRules          = termRules ++ nontermRules
+      rules             = termRules ++ nontermRules
 
   -- Group productions of all nonterminals together.
-  let merged            = mergeRules allRules
+  let merged            = mergeRules rules
 
   validateCommon merged
   return (CFGrammar merged "S")
