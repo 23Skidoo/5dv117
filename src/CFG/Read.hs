@@ -1,9 +1,6 @@
 module CFG.Read (readCFGrammar, readCNFGrammar)
        where
 
-import           CFG.Internal.NameMonad
-import           CFG.Types
-
 import           Control.Applicative    hiding (many, (<|>))
 import           Control.Monad          (foldM, unless)
 import           Data.Bifunctor         (first)
@@ -16,6 +13,9 @@ import           Data.Ord               (comparing)
 import qualified Data.Set               as S
 import           Data.Tuple             (swap)
 import           Text.Parsec
+
+import           CFG.Internal.NameMonad
+import           CFG.Types
 
 type SymbolMap = M.Map Symbol RuleName
 type SymOrName = Either Symbol RuleName

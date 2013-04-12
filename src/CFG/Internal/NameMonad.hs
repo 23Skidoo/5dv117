@@ -4,10 +4,10 @@ module CFG.Internal.NameMonad (
   )
   where
 
-import           CFG.Types
-
 import           Control.Monad.State
 import qualified Data.Set            as S
+
+import           CFG.Types
 
 -- Monad for generating fresh names.
 data NameState = NameState { nameStateCounter :: !Int
