@@ -2,7 +2,7 @@ name:                cfg
 version:             0.1.0.0
 synopsis:            Algorithms for Context-Free Grammars.
 description:
-  My solution for the complementary task of the "Efficient Algorithms and
+  My solution for the complementary task for the "Efficient Algorithms and
   Problem Complexity" course.
 homepage:            http://www8.cs.umu.se/kurser/5DV117/HT12/
 license:             GPL-3
