@@ -16,11 +16,14 @@ module CFG.Types (
   ,NamedCNFGrammar, CompiledCNFGrammar
 
   -- * Misc. helper functions.
-  ,Rule(..), Grammar(..), isStartRule, compileGrammar
+  ,Rule(..), Grammar(..)
+  ,isStartRule, compileGrammar
   ,charToSymbol, stringToSymbols, symbolsToString
   )
   where
 
+import           Data.Bifunctor (bimap, second)
+import           Data.Char  (isAlpha, isPunctuation, toLower)
 import qualified Data.Map   as M
 import           Data.Maybe (fromJust)
 
@@ -32,11 +35,12 @@ type Symbols    = [Symbol]
 type RuleName   = String
 type RuleNumber = Int
 
--- General CFG. A rule that generates the empty string is represented as
--- @CFGNonTerminalRule "RuleName" [[]]@
-data CFGRule a = CFGTerminalRule !a !Symbol
-               | CFGNonTerminalRule !a ![[a]]
-               deriving (Eq, Show)
+-- General CFG.
+data CFGRule ruleName = CFGRule !ruleName ![CFGProduction ruleName]
+                      deriving (Eq, Show)
+
+-- General CFG production. An empty string is represented as @[]@.
+type CFGProduction ruleName = [Either Symbol ruleName]
 
 type NamedCFGRule    = CFGRule RuleName
 type NumberedCFGRule = CFGRule RuleNumber
@@ -49,9 +53,10 @@ type NamedCFGrammar    = CFGrammar RuleName
 type CompiledCFGrammar = CFGrammar RuleNumber
 
 -- A context-free grammar in CNF form.
-data CNFRule a = CNFTerminalRule !a !Symbol
-               | CNFNonTerminalRule !a ![(a,a)]
+data CNFRule ruleName = CNFRule !ruleName ![CNFProduction ruleName]
                deriving (Eq, Show)
+-- A CFG production in CNF.
+type CNFProduction ruleName = Either Symbol (ruleName, ruleName)
 
 type NamedCNFRule    = CNFRule RuleName
 type NumberedCNFRule = CNFRule RuleNumber
@@ -68,69 +73,37 @@ type CompiledCNFGrammar = CNFGrammar RuleNumber
 
 -- | Helpers for rules.
 class Rule (r :: * -> *) where
-  type NonTermProduction r a :: *
+  type RuleProduction r a :: *
 
   ruleName   :: r a -> a
   ruleName   = ruleNumber
+
   ruleNumber :: r a -> a
   ruleNumber = ruleName
 
-  isTerminalRule    :: r a -> Bool
-  isNonTerminalRule :: r a -> Bool
-
-  terminalRuleProduces       :: r a -> Symbol -> Bool
-  nonTerminalRuleProductions :: r a -> [NonTermProduction r a]
-
-  mkNonTerminal :: a -> [NonTermProduction r a] -> r a
-  mapRuleName   :: (a -> b) -> r a -> r b
+  ruleProductions :: r a -> [RuleProduction r a]
+  mkRule          :: a -> [RuleProduction r a] -> r a
+  mapRuleName     :: (a -> b) -> r a -> r b
 
 instance Rule CFGRule where
-  type NonTermProduction CFGRule a = [a]
+  type RuleProduction CFGRule a = CFGProduction a
 
-  ruleName (CFGTerminalRule name _)    = name
-  ruleName (CFGNonTerminalRule name _) = name
+  ruleName (CFGRule name _)         = name
+  ruleProductions (CFGRule _ prods) = prods
+  mkRule name prods                 = CFGRule name prods
 
-  isTerminalRule (CFGTerminalRule _ _) = True
-  isTerminalRule _                     = False
-
-  isNonTerminalRule (CFGNonTerminalRule _ _) = True
-  isNonTerminalRule _                        = False
-
-  terminalRuleProduces (CFGTerminalRule _ s) s' = (s == s')
-  terminalRuleProduces _ _ = error "Terminal rule expected!"
-
-  nonTerminalRuleProductions (CFGNonTerminalRule _ prods) = prods
-  nonTerminalRuleProductions _ = error "Nonterminal rule expected!"
-
-  mkNonTerminal name prods = CFGNonTerminalRule name prods
-
-  mapRuleName f (CFGTerminalRule nam sym)      = CFGTerminalRule (f nam) sym
-  mapRuleName f (CFGNonTerminalRule nam prods) = CFGNonTerminalRule (f nam)
-                                                 (map (map f) prods)
+  mapRuleName f (CFGRule nam prods) =
+    CFGRule (f nam) (map (map (second f)) prods)
 
 instance Rule CNFRule where
-  type NonTermProduction CNFRule a = (a,a)
+  type RuleProduction CNFRule a = CNFProduction a
 
-  ruleName (CNFTerminalRule name _)    = name
-  ruleName (CNFNonTerminalRule name _) = name
+  ruleName (CNFRule name _)         = name
+  ruleProductions (CNFRule _ prods) = prods
+  mkRule name prods                 = CNFRule name prods
 
-  isTerminalRule (CNFTerminalRule _ _) = True
-  isTerminalRule _                     = False
-
-  isNonTerminalRule (CNFNonTerminalRule _ _) = True
-  isNonTerminalRule _                        = False
-
-  terminalRuleProduces (CNFTerminalRule _ s) s' = (s == s')
-  terminalRuleProduces _ _ = error "Terminal rule expected!"
-
-  nonTerminalRuleProductions (CNFNonTerminalRule _ prods) = prods
-  nonTerminalRuleProductions _ = error "Nonterminal rule expected!"
-
-  mkNonTerminal name prods = CNFNonTerminalRule name prods
-
-  mapRuleName f (CNFTerminalRule nam sym)      = CNFTerminalRule (f nam) sym
-  mapRuleName f (CNFNonTerminalRule nam prods) = CNFNonTerminalRule (f nam)
-                                                 [(f a, f b) | (a,b) <- prods]
+  mapRuleName f (CNFRule nam prods) =
+    CNFRule (f nam) (map (second (bimap f f)) prods)
 
 -- | Helpers for grammars.
 class Grammar g where
@@ -159,7 +132,8 @@ instance Grammar CNFGrammar where
     CNFGrammar (map (mapRuleName f) rules) (f start) e
 
 -- | Is this a start rule for this grammar?
-isStartRule :: (Eq a, Grammar g, Rule r) => g a -> r a -> Bool
+isStartRule :: (Eq a, Grammar g, Rule (GrammarRule g)) =>
+               g a -> GrammarRule g a -> Bool
 isStartRule g r | (startRule g == ruleName r) = True
                 | otherwise                   = False
 
@@ -177,10 +151,12 @@ compileGrammar g = mapRuleNames lookupName g
     lookupName k = fromJust $ M.lookup k idxMap
 
 
--- Helpers for working with the 'Symbol' type.
+-- -- Helpers for working with the 'Symbol' type.
 
 charToSymbol :: Char -> Symbol
-charToSymbol = SymChar
+charToSymbol c
+  | isAlpha c || isPunctuation c = SymChar (toLower c)
+  | otherwise = error $ "charToSymbol: '" ++ c : "' is not a valid symbol!"
 
 stringToSymbols :: String -> Symbols
 stringToSymbols s = map SymChar s

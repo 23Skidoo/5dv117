@@ -25,9 +25,9 @@ demo = do
   putStrLn $ "Result for the invalid input: " ++ (show invalidResult)
 
 -- | Usage:
--- $ cykAlgorithm "S -> SS, S -> LH, S -> LR, H -> SR, L -> (, R -> )" "(())()"
+-- $ cykAlgorithm "S -> AB, A -> a, B -> B1B, B -> B1B1, B1 -> b" "abbb"
 -- Recognised.
--- $ cykAlgorithm "S -> SS, S -> LH, S -> LR, H -> SR, L -> (, R -> )" "zZz"
+-- $ cykAlgorithm "S -> AB, A -> a, B -> B1B, B -> B1B1, B1 -> b" "zZz"
 -- Not recognised.
 main :: IO ()
 main = do

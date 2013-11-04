@@ -6,6 +6,7 @@ import Control.Monad
 import Data.Array.IArray
 import Data.Array.MArray
 import Data.Array.ST
+import Data.Either.Combinators (fromRight', isRight)
 
 import CFG.Types
 
@@ -25,19 +26,25 @@ cykAlgorithm grammar input' = if n == 0
       marr <- newArray ((1,1,1),(n,n,r)) False
 
       forM_ (zip [1..] input) $ \(i, ci) ->
-        forM_ (filter isTerminalRule rules) $ \rule -> do
+        forM_ rules $ \rule -> do
           let j = ruleNumber rule
-          when (terminalRuleProduces rule ci) $
+          when (rule `producesSymbol` ci) $
             writeArray marr (i,1,j) True
 
       forM_ [2..n] $ \i ->
         forM_ [1..(n-i+1)] $ \j ->
           forM_ [1..(i-1)] $ \k ->
-            forM_ (filter isNonTerminalRule rules) $ \rule -> do
+            forM_ rules $ \rule -> do
               let a = ruleNumber rule
-              forM_ (nonTerminalRuleProductions rule) $ \(b, c) -> do
+              forM_ (nontermProductions rule) $ \(b, c) -> do
                 e0 <- readArray marr (j,k,b)
                 e1 <- readArray marr (j+k,i-k,c)
                 when (e0 && e1) $
                   writeArray marr (j,i,a) True
       return marr
+
+    producesSymbol :: NumberedCNFRule -> Symbol -> Bool
+    producesSymbol rule s = Left s `elem` (ruleProductions rule)
+
+    nontermProductions :: NumberedCNFRule -> [(RuleNumber, RuleNumber)]
+    nontermProductions = map fromRight' . filter isRight . ruleProductions
