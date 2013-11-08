@@ -31,25 +31,32 @@ prop_parentheses_inverted = prop_parentheses_gen True
 
 -- HUnit tests.
 
+assertRecognised :: String -> CompiledCNFGrammar -> String -> Assertion
+assertRecognised grammarName grammar str =
+  assertBool ("String '" ++ str ++ "' not recognised by the '"
+              ++ grammarName ++ "' grammar.")
+  (cykAlgorithm grammar str)
+
+assertNotRecognised :: String -> CompiledCNFGrammar -> String -> Assertion
+assertNotRecognised grammarName grammar str =
+  assertBool ("String '" ++ str ++ "' erroneously recognised by the '"
+              ++ grammarName ++ "' grammar.")
+  (not $ cykAlgorithm grammar str)
+
 test_silly :: Assertion
 test_silly = do
-  let res1 = cykAlgorithm sillyGrammar "oo"
-      res2 = cykAlgorithm sillyGrammar "not silly"
-  assertBool "Silly string not recognised by an silly-producing grammar." res1
-  assertBool "Silly-producing grammar recognised a non-silly string." (not res2)
+  assertNotRecognised "silly1" sillyGrammar "o"
+  assertRecognised    "silly1" sillyGrammar "oo"
+  assertNotRecognised "silly1" sillyGrammar "ooo"
+  assertNotRecognised "silly1" sillyGrammar "not silly"
 
 test_silly2 :: Assertion
 test_silly2 = do
-  let res1 = cykAlgorithm sillyGrammar2 "lo"
-      res2 = cykAlgorithm sillyGrammar2 "ol"
-      res3 = cykAlgorithm sillyGrammar2 "olol"
-      res4 = cykAlgorithm sillyGrammar2 "lolo"
-      res5 = cykAlgorithm sillyGrammar2 "ololl"
-  assertBool "Silly string 1 not recognised by an silly-producing grammar." res1
-  assertBool "Silly string 2 not recognised by an silly-producing grammar." res2
-  assertBool "Silly string 3 not recognised by an silly-producing grammar." res3
-  assertBool "Silly string 4 not recognised by an silly-producing grammar." res4
-  assertBool "Silly-producing grammar recognised a non-silly string." (not res5)
+  assertRecognised    "silly2" sillyGrammar2 "lo"
+  assertRecognised    "silly2" sillyGrammar2 "ol"
+  assertRecognised    "silly2" sillyGrammar2 "olol"
+  assertRecognised    "silly2" sillyGrammar2 "lolo"
+  assertNotRecognised "silly2" sillyGrammar2 "ololl"
 
 test_read_cnf :: Assertion
 test_read_cnf = do
@@ -58,10 +65,9 @@ test_read_cnf = do
     (Left err) -> assertFailure $ "Parse failed: " ++ err
     (Right gr) -> do
       let gram = compileGrammar gr
-          res1 = cykAlgorithm gram "oo"
-          res2 = cykAlgorithm gram "erroneous"
-      assertBool "String not recognised by 'myGrammar'." res1
-      assertBool "'myGrammar' recognised an invalid string." (not res2)
+      assertRecognised    "myGrammar" gram "oo"
+      assertNotRecognised "myGrammar" gram ""
+      assertNotRecognised "myGrammar" gram "erroneous"
 
 test_read_cnf_empty :: Assertion
 test_read_cnf_empty = do
@@ -70,12 +76,9 @@ test_read_cnf_empty = do
     (Left err) -> assertFailure $ "Parse failed: " ++ err
     (Right gr) -> do
       let gram = compileGrammar gr
-          res0 = cykAlgorithm gram ""
-          res1 = cykAlgorithm gram "oo"
-          res2 = cykAlgorithm gram "erroneous"
-      assertBool "String 0 not recognised by 'myGrammar'." res0
-      assertBool "String 1 not recognised by 'myGrammar'." res1
-      assertBool "'myGrammar' recognised an invalid string." (not res2)
+      assertRecognised    "myGrammar" gram ""
+      assertRecognised    "myGrammar" gram "oo"
+      assertNotRecognised "myGrammar" gram "erroneous"
 
 -- Entry point
 main :: IO ()
